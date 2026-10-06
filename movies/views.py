@@ -1,4 +1,4 @@
-﻿import hashlib
+import hashlib
 import json
 
 from django.conf import settings
@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
 from .models import (
+    Genre,
     Movie,
     Actor,
     Clip,
@@ -85,25 +86,29 @@ def genres(request):
     return render(
         request,
         "movies/genres.html",
-        {"genres": GENRES},
+        {
+            "genres": Genre.objects.filter(active=True)
+        },
     )
 
-
 def genre_detail(request, slug):
+    genre = get_object_or_404(
+        Genre,
+        slug=slug,
+        active=True,
+    )
+
     return render(
         request,
         "movies/genre_detail.html",
         {
-            "genre_name": dict(GENRES).get(
-                slug,
-                slug.replace("-", " ").title(),
-            ),
+            "genre_name": genre.name,
+            "genre": genre,
             "movies": Movie.objects.filter(
-                genre=slug
+                genre=genre.slug
             ),
         },
     )
-
 
 def movie_detail(request, slug):
     movie = get_object_or_404(
@@ -227,6 +232,49 @@ def react(request, slug, value):
     )
 
 
+def weekly_vote_detail(request, vote_id):
+    vote = get_object_or_404(
+        WeeklyVote,
+        pk=vote_id,
+    )
+
+    if not vote.is_live:
+        messages.info(
+            request,
+            "This weekly vote is no longer active.",
+        )
+        return redirect("home")
+
+    nominees = vote.nominees.all().annotate(
+        weekly_vote_count=models.Count(
+            "weekly_entries",
+            filter=models.Q(
+                weekly_entries__weekly_vote=vote
+            ),
+        )
+    )
+
+    has_voted = WeeklyVoteEntry.objects.filter(
+        weekly_vote=vote,
+        visitor_key=visitor_key(request),
+    ).exists()
+
+    total_votes = WeeklyVoteEntry.objects.filter(
+        weekly_vote=vote
+    ).count()
+
+    return render(
+        request,
+        "movies/weekly_vote.html",
+        {
+            "active_vote": vote,
+            "nominees": nominees,
+            "has_voted": has_voted,
+            "total_votes": total_votes,
+        },
+    )
+
+
 def cast_vote(request, vote_id, movie_id):
     vote = get_object_or_404(
         WeeklyVote,
@@ -245,7 +293,10 @@ def cast_vote(request, vote_id, movie_id):
             pk=movie.pk
         ).exists()
     ):
-        return redirect("home")
+        return redirect(
+            "weekly_vote_detail",
+            vote_id=vote.id,
+        )
 
     try:
         WeeklyVoteEntry.objects.create(
@@ -265,7 +316,10 @@ def cast_vote(request, vote_id, movie_id):
             "You have already voted in this weekly vote.",
         )
 
-    return redirect("home")
+    return redirect(
+        "weekly_vote_detail",
+        vote_id=vote.id,
+    )
 
 
 def clips(request):

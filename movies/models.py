@@ -1,4 +1,4 @@
-﻿from django.conf import settings
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -13,6 +13,22 @@ GENRES = [
     ("adventure", "Adventure"),
     ("faith-based", "FaithBased"),
 ]
+
+
+class Genre(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    order = models.PositiveIntegerField(default=0)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order", "name"]
+        verbose_name = "Genre"
+        verbose_name_plural = "Genres"
+
+    def __str__(self):
+        return self.name
 
 
 class Movie(models.Model):

@@ -1,6 +1,8 @@
-﻿from django.contrib import admin
+from django.contrib import admin
+from django import forms
 
 from .models import (
+    Genre,
     Movie,
     Actor,
     Clip,
@@ -12,8 +14,60 @@ from .models import (
 )
 
 
+@admin.register(Genre)
+class GenreAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug", "order", "active")
+    list_editable = ("order", "active")
+    list_filter = ("active",)
+    search_fields = ("name", "slug", "description")
+    prepopulated_fields = {"slug": ("name",)}
+    ordering = ("order", "name")
+
+
+class MovieAdminForm(forms.ModelForm):
+    class Meta:
+        model = Movie
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if "genre" in self.fields:
+            active_genres = Genre.objects.filter(
+                active=True
+            ).order_by("order", "name")
+
+            choices = [
+                ("", "---------"),
+            ]
+
+            choices.extend(
+                (genre.slug, genre.name)
+                for genre in active_genres
+            )
+
+            # Preserve an existing movie's genre even if that genre
+            # has been deactivated in Genre Admin.
+            current_value = self.instance.genre
+
+            if current_value and not any(
+                value == current_value
+                for value, label in choices
+            ):
+                choices.append(
+                    (
+                        current_value,
+                        f"{current_value} (inactive)"
+                    )
+                )
+
+            self.fields["genre"].choices = choices
+
+
 @admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
+    form = MovieAdminForm
+
     list_display = (
         "title",
         "genre",

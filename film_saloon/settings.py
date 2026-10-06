@@ -1,16 +1,16 @@
-﻿from pathlib import Path
+from pathlib import Path
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
-    "film-saloon-dev-key-change-in-production",
+    "rJsXaQm_tsla4NujXSAuzqWWFwkJGB6vXgpyUseOJSQOQx9CnFhpMtM4-Hlhgj8cvaD__NvG5Bg9vixxxdBLaQ",
 )
 
 DEBUG = os.environ.get(
     "DJANGO_DEBUG",
-    "True",
+    "False",
 ).lower() == "true"
 
 ALLOWED_HOSTS = [
@@ -128,3 +128,11 @@ VAPID_CLAIM_EMAIL = os.environ.get(
     "VAPID_CLAIM_EMAIL",
     "mailto:admin@filmsaloon.pythonanywhere.com",
 )
+
+# PythonAnywhere production security
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
