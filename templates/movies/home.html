@@ -5,6 +5,19 @@
 <section id="most" class="content-section"><div class="section-heading"><div><span class="eyebrow">FEATURED PICKS</span><h2>🔥 Most Recommended</h2></div><a class="section-link" href="{% url 'search' %}">Discover more →</a></div><div class="movie-grid">{% for movie in most %}{% include "movies/card.html" with movie=movie %}{% empty %}<div class="empty">Featured movies will appear here.</div>{% endfor %}</div></section>
 <section class="content-section"><div class="section-heading"><div><span class="eyebrow">TODAY</span><h2>🏆 Top 5 Movies of the Day</h2></div></div><div class="movie-grid">{% for movie in top %}{% include "movies/card.html" with movie=movie %}{% empty %}<div class="empty">Today's movie picks are coming soon.</div>{% endfor %}</div></section>
 <section class="content-section"><div class="section-heading"><div><span class="eyebrow">MORE TO WATCH</span><h2>✨ Other Recommended Movies</h2></div></div><div class="movie-grid">{% for movie in other %}{% include "movies/card.html" with movie=movie %}{% empty %}<div class="empty">More recommendations are coming soon.</div>{% endfor %}</div></section>
-{% if active_vote %}<section class="vote-hero"><div><span class="eyebrow">WEEKLY VOTE</span><h2>{{ active_vote.title }}</h2><p>{{ active_vote.description|default:"Choose your weekly favorite." }}</p></div><a class="primary-btn" href="#weekly-vote">Vote Now ↓</a></section><section id="weekly-vote" class="content-section"><div class="section-heading"><div><span class="eyebrow">YOUR VOICE</span><h2>🗳️ Nominated Movies</h2></div></div><div class="nominee-grid">{% for movie in nominations %}<article class="nominee-card"><span class="genre-pill static">{{ movie.get_genre_display }}</span><h3>{{ movie.title }}</h3><p>{{ movie.description|truncatewords:20 }}</p><form method="post" action="{% url 'cast_vote' active_vote.id movie.id %}">{% csrf_token %}<button class="primary-btn" type="submit">Vote for this movie</button></form></article>{% empty %}<div class="empty">No nominations are available right now.</div>{% endfor %}</div></section>{% endif %}
+{% if active_vote %}
+<section class="vote-hero">
+    <div>
+        <span class="eyebrow">WEEKLY VOTE</span>
+        <h2>{{ active_vote.title }}</h2>
+        <p>{{ active_vote.description|default:"Choose your weekly favorite." }}</p>
+    </div>
+
+    <a class="primary-btn"
+       href="{% url 'weekly_vote_detail' active_vote.id %}">
+        Vote for Movie of the Week →
+    </a>
+</section>
+{% endif %}
 <section class="content-section"><div class="section-heading"><div><span class="eyebrow">EXPLORE BY MOOD</span><h2>Find Your Genre</h2></div><a href="{% url 'genres' %}" class="section-link">All genres →</a></div><div class="genre-chips">{% for slug,name in genres %}<a href="{% url 'genre_detail' slug %}">{{ name }} <span>→</span></a>{% endfor %}</div></section>
 {% endblock %}

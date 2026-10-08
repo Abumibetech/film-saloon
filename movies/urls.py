@@ -1,4 +1,4 @@
-﻿from django.urls import path
+from django.urls import path
 
 from . import views
 
@@ -32,6 +32,12 @@ urlpatterns = [
         "movie/<slug:slug>/react/<str:value>/",
         views.react,
         name="react",
+    ),
+
+    path(
+        "movie-of-the-week/<int:vote_id>/",
+        views.weekly_vote_detail,
+        name="weekly_vote_detail",
     ),
 
     path(

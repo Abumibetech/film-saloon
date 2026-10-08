@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}{{ active_vote.title }} — FILM SALOON{% endblock %}
+
+{% block content %}
+
+<section class="page-heading">
+    <span class="eyebrow">MOVIE OF THE WEEK</span>
+
+    <h1>{{ active_vote.title }}</h1>
+
+    {% if active_vote.description %}
+        <p>{{ active_vote.description }}</p>
+    {% else %}
+        <p>Choose your favorite movie and make your voice count.</p>
+    {% endif %}
+
+    <div class="hero-mini">
+        <span>🗳️ {{ total_votes }} total vote{{ total_votes|pluralize }}</span>
+        <span>🎬 {{ nominees|length }} nominated movie{{ nominees|length|pluralize }}</span>
+    </div>
+</section>
+
+<section class="content-section">
+
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">YOUR VOICE MATTERS</span>
+            <h2>🗳️ Vote for Your Favorite</h2>
+        </div>
+    </div>
+
+    {% if has_voted %}
+        <div class="vote-hero">
+            <div>
+                <span class="eyebrow">VOTE RECORDED</span>
+                <h2>You have already voted</h2>
+                <p>
+                    Thank you for participating in this week's
+                    Movie of the Week.
+                </p>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="nominee-grid">
+
+        {% for movie in nominees %}
+
+            <article class="nominee-card">
+
+                <a href="{% url 'movie_detail' movie.slug %}" class="poster">
+
+                    {% if movie.poster %}
+                        <img src="{{ movie.poster.url }}"
+                             alt="{{ movie.title }}">
+                    {% else %}
+                        <div class="poster-placeholder">🎬</div>
+                    {% endif %}
+
+                    <span class="genre-pill">
+                        {{ movie.get_genre_display }}
+                    </span>
+
+                </a>
+
+                <div class="movie-content">
+
+                    <h3>
+                        <a href="{% url 'movie_detail' movie.slug %}">
+                            {{ movie.title }}
+                        </a>
+                    </h3>
+
+                    <p>
+                        {{ movie.description|truncatewords:25 }}
+                    </p>
+
+                    <div class="reaction-summary">
+                        🗳️
+                        <strong>{{ movie.weekly_vote_count }}</strong>
+                        vote{{ movie.weekly_vote_count|pluralize }}
+                    </div>
+
+                    {% if not has_voted %}
+
+                        <form method="post"
+                              action="{% url 'cast_vote' active_vote.id movie.id %}"
+                              style="margin-top:14px;">
+
+                            {% csrf_token %}
+
+                            <button class="primary-btn"
+                                    type="submit">
+                                Vote for this movie
+                            </button>
+
+                        </form>
+
+                    {% else %}
+
+                        <button class="outline-btn"
+                                type="button"
+                                disabled
+                                style="margin-top:14px;width:100%;">
+                            Vote Already Cast
+                        </button>
+
+                    {% endif %}
+
+                </div>
+
+            </article>
+
+        {% empty %}
+
+            <div class="empty">
+                No movies have been nominated for this week's vote yet.
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}

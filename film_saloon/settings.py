@@ -17,10 +17,13 @@ ALLOWED_HOSTS = [
     x.strip()
     for x in os.environ.get(
         "DJANGO_ALLOWED_HOSTS",
-        "127.0.0.1,localhost",
+        "filmsaloon.pythonanywhere.com,127.0.0.1,localhost",
     ).split(",")
     if x.strip()
 ]
+
+if "filmsaloon.pythonanywhere.com" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append("filmsaloon.pythonanywhere.com")
 
 CSRF_TRUSTED_ORIGINS = [
     x.strip()
